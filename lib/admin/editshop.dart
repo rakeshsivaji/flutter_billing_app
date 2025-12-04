@@ -1,0 +1,899 @@
+import 'package:billing_app/Models/editshop_model.dart';
+import 'package:billing_app/Models/orderdelivery_model.dart';
+
+// import 'package:billing_app/Models/product_model';
+import 'package:billing_app/controllers/common_controller.dart';
+import 'package:billing_app/services/common_service.dart';
+import 'package:billing_app/widgets/customappbar.dart';
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
+
+class EditShop extends StatefulWidget {
+  const EditShop({super.key});
+
+  @override
+  State<EditShop> createState() => _EditShopState();
+}
+
+class _EditShopState extends State<EditShop> {
+  List<String> routeList = <String>[
+    'Tirunelveli - Tenkasi',
+    'Tenkasi - Tirunelveli',
+    ''
+  ];
+  List<String> billList = <String>['தனிப்பட்ட ரசிதுகள்', 'சாதாரண ரசிதுகள்'];
+  String routeDropdownValue = '';
+  String billDropdownValue = '';
+  String selectedValue = '';
+  String selectedCard = '';
+  String shopid = '';
+  String name = '';
+  String address = '';
+  String ownername = '';
+  String phon = '';
+  String route = '';
+  String route2 = '';
+  bool clicked = false;
+  var commonController = Get.put(CommonController());
+  final _formKey1 = GlobalKey<FormState>();
+  final _formKey2 = GlobalKey<FormState>();
+  final TextEditingController shopName = TextEditingController();
+  final TextEditingController shopAddress = TextEditingController();
+  final TextEditingController ownerName = TextEditingController();
+  final TextEditingController phone = TextEditingController();
+  final TextEditingController amount = TextEditingController();
+  final TextEditingController search = TextEditingController();
+
+  EditShopModel? editShopModel;
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+    // print(editShopModel!.data.storeId.toString());
+  }
+
+  void getData() async {
+    dynamic response =
+        await CommonService().getEditShop(Get.arguments['id'].toString());
+    if (response['status'] == 1) {
+      setState(() {
+        editShopModel = EditShopModel.fromJson(response);
+        shopName.text = editShopModel!.data.name;
+        shopAddress.text = editShopModel!.data.address;
+        ownerName.text = editShopModel!.data.ownerName;
+        phone.text = editShopModel!.data.phone;
+        // amount.text = editShopModel!.data.amount;
+        shopid = Get.arguments['id'].toString();
+        // selectedCard = editShopModel!.data.productId.toString();
+        routeDropdownValue = editShopModel!.data.path;
+        billDropdownValue = editShopModel!.data.billType;
+      });
+    }
+    print(response);
+  }
+
+  void showToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.deepPurple,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async {
+        Get.toNamed('/shops');
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: const Color.fromRGBO(120, 89, 207, 1),
+        body: Obx(
+          () {
+            return Column(
+              children: [
+                CustomAppBar(
+                  text: 'கடையை திருத்தவும்',
+                  path: '/shops',
+                ),
+                Expanded(
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(30))),
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 25.0, vertical: 10.0),
+                        child: Form(
+                          key: _formKey1,
+                          child: Column(
+                            children: [
+                              const SizedBox(
+                                height: 25.0,
+                              ),
+                              Container(
+                                width: double.infinity,
+                                height: 43,
+                                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                                decoration: BoxDecoration(
+                                    color: const Color.fromRGBO(250, 250, 250, 1),
+                                    borderRadius: BorderRadius.circular(15),
+                                    border: Border.all(
+                                      color: Colors.grey.withOpacity(0.5),
+                                    )),
+                                child: DropdownButton<String>(
+                                  isExpanded: true,
+                                  value: routeDropdownValue.isEmpty
+                                      ? null
+                                      : routeDropdownValue,
+                                  onChanged:
+                                      null /*(String? newValue) {
+                                    setState(() {
+                                      routeDropdownValue = newValue!;
+                                    });
+                                  }*/
+                                  ,
+                                  hint: const Text(
+                                    'பாதையை தேர்வு செய்க',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                  style: const TextStyle(
+                                      fontSize: 15, color: Colors.black),
+                                  icon: Image.asset(
+                                    'assets/images/arrowdown.png',
+                                    width: 15,
+                                  ),
+                                  items: commonController.pathName!
+                                      .map((id, name) {
+                                        return MapEntry(
+                                            id,
+                                            DropdownMenuItem<String>(
+                                              value: name,
+                                              child: Text(
+                                                name,
+                                                style: const TextStyle(
+                                                    color: Colors.black),
+                                              ),
+                                            ));
+                                      })
+                                      .values
+                                      .toList(),
+                                  underline: Container(),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    route,
+                                    textAlign: TextAlign.left,
+                                    style: const TextStyle(
+                                        color: Colors.red, fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(
+                                height: 5.0,
+                              ),
+                              buildFormField('கடை பெயரை உள்ளிடவும்', shopName,
+                                  (value) {
+                                setState(() {
+                                  if (value == null || value.isEmpty) {
+                                    name = 'கடை பெயரை உள்ளிடவும்';
+                                  } else {
+                                    name = '';
+                                  }
+                                  if (routeDropdownValue.isEmpty) {
+                                    route = 'பாதையை தேர்வு செய்க';
+                                  } else {
+                                    route = '';
+                                  }
+                                  if (billDropdownValue.isEmpty) {
+                                    route2 = 'ரசிது தேர்வு செய்க';
+                                  } else {
+                                    route2 = '';
+                                  }
+                                });
+                                return null;
+                              }),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    name,
+                                    textAlign: TextAlign.left,
+                                    style: const TextStyle(
+                                        color: Colors.red, fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                              addressShop('கடை முகவரி உள்ளிடவும்', shopAddress,
+                                  (value) {
+                                setState(() {
+                                  if (value == null || value.isEmpty) {
+                                    address = 'கடை முகவரி உள்ளிடவும்';
+                                  } else {
+                                    address = '';
+                                  }
+                                });
+                                return null;
+                              }),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    address,
+                                    textAlign: TextAlign.left,
+                                    style: const TextStyle(
+                                        color: Colors.red, fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                              buildFormField(
+                                  'கடை நிர்வாகர் பெயரை உள்ளிடவும்', ownerName,
+                                  (value) {
+                                setState(() {
+                                  if (value == null || value.isEmpty) {
+                                    ownername =
+                                        'கடை நிர்வாகர் பெயரை உள்ளிடவும்';
+                                  } else {
+                                    ownername = '';
+                                  }
+                                });
+                                return null;
+                              }),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    ownername,
+                                    textAlign: TextAlign.left,
+                                    style: const TextStyle(
+                                        color: Colors.red, fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                              buildFormField(
+                                  'கடை தொலைபேசி எண்ணை உள்ளிடவும்', phone,
+                                  (value) {
+                                setState(() {
+                                  if (value == null || value.isEmpty) {
+                                    phon = 'கடை தொலைபேசி எண்ணை உள்ளிடவும்';
+                                  } else if (value.length < 10) {
+                                    phon = '10 எண்களை உள்ளிடவும்';
+                                  } else if (value.length > 10) {
+                                    phon = 'எண்களை சரி செய்யவும்';
+                                  } else {
+                                    phon = '';
+                                  }
+                                });
+                                return null;
+                              }),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    phon,
+                                    textAlign: TextAlign.left,
+                                    style: const TextStyle(
+                                        color: Colors.red, fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                              Container(
+                                width: double.infinity,
+                                height: 45,
+                                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                                margin: const EdgeInsets.only(top: 15),
+                                decoration: BoxDecoration(
+                                    color: const Color.fromRGBO(250, 250, 250, 1),
+                                    borderRadius: BorderRadius.circular(15),
+                                    border: Border.all(
+                                      color: Colors.grey.withOpacity(0.5),
+                                    )),
+                                child: DropdownButton<String>(
+                                  isExpanded: true,
+                                  value: billDropdownValue.isEmpty
+                                      ? null
+                                      : billDropdownValue,
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      billDropdownValue = newValue!;
+                                    });
+                                  },
+                                  hint: const Text(
+                                    'ரசிது தேர்வு செய்க',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                  style: const TextStyle(
+                                      fontSize: 15, color: Colors.black),
+                                  icon: Image.asset(
+                                    'assets/images/arrowdown.png',
+                                    width: 15,
+                                  ),
+                                  items: billList.map<DropdownMenuItem<String>>(
+                                      (String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                  underline: Container(),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    route2,
+                                    textAlign: TextAlign.left,
+                                    style: const TextStyle(
+                                        color: Colors.red, fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(
+                                height: 10.0,
+                              ),
+                              /* if(billDropdownValue.isNotEmpty&&billDropdownValue=='தனிப்பட்ட ரசிதுகள்')...[*/
+                              InkWell(
+                                onTap: () async {
+                                  showBottomSheet(context);
+                                },
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(15),
+                                    color: const Color.fromRGBO(120, 89, 217, 0.8),
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      'பொருள் தொகையை உறுதிப்படுத்தவும்',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              /*],*/
+                              const SizedBox(
+                                height: 40.0,
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  if (clicked == false) {
+                                    submit();
+                                  }
+                                },
+                                child: Container(
+                                  width: 120,
+                                  height: 45,
+                                  decoration: BoxDecoration(
+                                    color: const Color.fromRGBO(120, 89, 217, 1),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Center(
+                                    child: clicked
+                                        ? const CircularProgressIndicator(
+                                            color: Colors.white,
+                                          )
+                                        : const Text(
+                                            'சேமி',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Container addressShop(String label, TextEditingController controller,
+      String? Function(String?)? validator) {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: 100,
+      margin: const EdgeInsets.only(top: 15),
+      padding: const EdgeInsets.only(top: 10.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: const Color.fromRGBO(250, 250, 250, 1),
+        border: Border.all(
+          color: Colors.grey.withOpacity(0.5),
+        ),
+      ),
+      child: TextFormField(
+        maxLines: 20,
+        controller: shopAddress,
+        decoration: const InputDecoration(
+          hintText: 'கடை முகவரியை உள்ளிடவும்',
+          hintStyle: TextStyle(
+            color: Colors.grey,
+            fontSize: 15,
+            fontWeight: FontWeight.normal,
+          ),
+          border: OutlineInputBorder(
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: EdgeInsets.symmetric(horizontal: 20.0),
+        ),
+        validator: validator,
+      ),
+    );
+  }
+
+  StatefulBuilder buildRow(Product data) {
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.network(
+                data.image,
+                width: 30,
+                height: 30,
+              ),
+              const SizedBox(
+                width: 35.0,
+              ),
+              Expanded(
+                child: SelectableText(
+                  data.name,
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                ),
+              ),
+              Text(
+                data.amount,
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(
+                width: 15,
+              ),
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    amount.text = data.amount;
+                    _PopupMenu(data.productId.toString(), data.name, shopid);
+                    print(shopid);
+                  });
+                },
+                child: Image.asset(
+                  'assets/images/edit.png',
+                  width: 17,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _PopupMenu(String id, String name, String shopid) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Stack(
+          children: [
+            Container(
+              height: 200,
+              width: MediaQuery.of(context).size.width,
+              // padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    decoration: const BoxDecoration(
+                      color: Color.fromRGBO(120, 89, 217, 1),
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(10)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 15.0, vertical: 10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SelectableText(
+                            name,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const Divider(
+                    height: 0.5,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Container(
+                    height: 50,
+                    width: MediaQuery.of(context).size.width,
+                    margin: const EdgeInsets.symmetric(horizontal: 15.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white,
+                      border: Border.all(
+                        color: Colors.grey.withOpacity(0.5),
+                      ),
+                    ),
+                    child: Form(
+                      key: _formKey2,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(left: 15.0),
+                            child: SelectableText(
+                              ' ₹  |',
+                              style: TextStyle(fontSize: 20),
+                            ),
+                          ),
+                          Expanded(
+                            child: TextFormField(
+                              controller: amount,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                hintText: 'பொருள் கட்டணம் தொகை',
+                                hintStyle: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.normal,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(15.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(15.0),
+                                ),
+                                fillColor: const Color.fromRGBO(71, 52, 125, 1),
+                                contentPadding:
+                                    const EdgeInsets.symmetric(horizontal: 20.0),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      GestureDetector(
+                        onTap: () async {
+                          setState(() {
+                            editAmount(id, amount.text, shopid);
+                            Navigator.pop(context);
+                          });
+                        },
+                        child: Container(
+                          width: 100,
+                          height: 50,
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          decoration: BoxDecoration(
+                            color: const Color.fromRGBO(120, 89, 207, 1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'உறுதி',
+                              textAlign: TextAlign.center,
+                              style:
+                                  TextStyle(fontSize: 11, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              top: 5,
+              right: 5,
+              height: 30,
+              width: 30,
+              child: GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Image.asset('assets/images/closeicon2.png')),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future showBottomSheet(BuildContext context) {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return SingleChildScrollView(
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.8,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 20, horizontal: 20.0),
+                  child: Column(
+                    children: <Widget>[
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      const Text(
+                        'பொருள் தொகையை உறுதிப்படுத்தவும்',
+                        style: TextStyle(color: Colors.black, fontSize: 12),
+                      ),
+                      const SizedBox(
+                        height: 25,
+                      ),
+                      Container(
+                        width: MediaQuery.of(context).size.width - 30,
+                        height: 50,
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(25),
+                          color: const Color.fromRGBO(250, 250, 250, 1),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 1,
+                              blurRadius: 2,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: TextFormField(
+                          controller: search,
+                          onChanged: (value) {
+                            filterJobs(search: value);
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'தேடு பொருள்',
+                            hintStyle: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
+                              fontWeight: FontWeight.normal,
+                            ),
+                            border: const OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: const OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                            suffixIcon: IconButton(
+                              onPressed: () {},
+                              icon: Image.asset(
+                                'assets/images/search.png',
+                                width: 20,
+                                height: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Expanded(child: SingleChildScrollView(
+                        child: Obx(() {
+                          List<Product>? product = commonController
+                              .orderdeliverymodel.value?.data.product;
+                          return Column(
+                            children: [
+                              if (commonController.orderdelivery == false) ...[
+                                const Text('தயாரிப்புகள் இல்லை'),
+                              ] else ...[
+                                ListView.builder(
+                                    itemCount: product?.length,
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    itemBuilder: (context, index) {
+                                      return buildRow(commonController
+                                          .orderdeliverymodel
+                                          .value!
+                                          .data
+                                          .product[index]);
+                                    })
+                              ]
+                            ],
+                          );
+                        }),
+                      ))
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Container buildFormField(String label, TextEditingController controller,
+      String? Function(String?)? validator) {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: 45,
+      margin: const EdgeInsets.only(top: 15),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: const Color.fromRGBO(250, 250, 250, 1),
+        border: Border.all(
+          color: Colors.grey.withOpacity(0.5),
+        ),
+      ),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          hintText: label,
+          hintStyle: const TextStyle(
+            color: Colors.grey,
+            fontSize: 15,
+            fontWeight: FontWeight.normal,
+          ),
+          border: const OutlineInputBorder(
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20.0),
+        ),
+        validator: validator,
+      ),
+    );
+  }
+
+  filterJobs({
+    String? search,
+  }) async {
+    commonController.getOrderDelivery(
+      withLoader: false,
+      storeid: shopid,
+      filter: search,
+    );
+  }
+
+  void editAmount(String id, String editamount, String storeid) async {
+    if (_formKey2.currentState!.validate()) {
+      try {
+        // Map<String, dynamic> newData = {
+        //   'amount': amount.text,
+        //   'store_id': shopid,
+        // };
+
+        dynamic response =
+            await CommonService().editproductAmount2(id, editamount, storeid);
+        if (response['status'] == 1) {
+          await commonController.getOrderDelivery(
+              withLoader: true, storeid: shopid);
+          showToast(response['message']);
+          await commonController.getOrderDelivery(
+              withLoader: true, storeid: shopid);
+        } else {
+          showToast(response['message'] ?? 'பிழை ஏற்பட்டது');
+        }
+      } catch (error) {
+        print('Error: $error');
+        showToast('பிழை ஏற்பட்டது');
+      }
+    }
+  }
+
+  void submit() async {
+    if (_formKey1.currentState!.validate()) {
+      if (shopName.text.isEmpty ||
+          shopAddress.text.isEmpty ||
+          ownerName.text.isEmpty ||
+          phone.text.isEmpty ||
+          routeDropdownValue.isEmpty ||
+          billDropdownValue.isEmpty) {
+        return;
+      }
+      if (phone.text.length < 10) {
+        return;
+      }
+      setState(() {
+        clicked = true;
+      });
+      try {
+        Map<String, dynamic> newData = {
+          'path_id': commonController.pathId![routeDropdownValue].toString(),
+          'name': shopName.text,
+          'address': shopAddress.text,
+          'owner_name': ownerName.text,
+          'phone': phone.text,
+          'bill_type': billDropdownValue.toString(),
+        };
+
+        dynamic response = await CommonService()
+            .updateShop(newData, editShopModel!.data.storeId.toString());
+
+        if (response['status'] == 1) {
+          showToast(response['message']);
+          await commonController.getShops(withLoader: true);
+          await commonController.getOrderDelivery(
+              withLoader: true, storeid: shopid);
+          Get.toNamed('/shops');
+        } else {
+          showToast(response['message'] ?? 'பிழை ஏற்பட்டது');
+          setState(() {
+            clicked = false;
+          });
+        }
+      } catch (error) {
+        print('Error: $error');
+        showToast('பிழை ஏற்பட்டது');
+      }
+    }
+  }
+}
