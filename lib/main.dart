@@ -82,17 +82,10 @@ import 'package:get/get.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await FlutterDownloader.initialize();
-
   await FlutterDownloader.initialize(debug: false, ignoreSsl: true);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  runApp(
-      const MyApp());
+  runApp(const MyApp());
 }
-
-// void downloadCallback(String id, DownloadTaskStatus status, int progress) {
-//   print('Download task ($id) is in status ($status) and process ($progress)');
-// }
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -107,51 +100,6 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      routes: {
-        // '/splash': (context) => Splash(),
-        // '/login': (context) => Login(),
-        // '/forget': (context) => Forget(),
-        // '/otp': (context) => Otp(),
-        // '/home': (context) => Home(),
-        // '/billentries': (context) => Billentries(),
-        // '/shopbills': (context) => Shopbills(),
-        // '/profile': (context) => Profile(),
-        // '/stocklist': (context) => Stocklist(),
-        // '/announce': (context) => Announce(),
-        // '/cstlist': (context) => Cstlist(),
-        // '/stlisthistory': (context) => Stlisthistory(),
-        // '/orderscreen': (context) => order_screen(),
-        // '/orderlist': (context) => Orderlist(),
-        // '/pendingorder': (context) => PendingOrder(),
-        // '/enteredbills': (context) => EnteredBills(),
-        // '/billdetails': (context) => BillDetails(),
-        // '/createstocklist': (context) => Create_Stocklist_Screen(),
-        // '/stocklist2': (context) => Stocklist2_Screen(),
-        // '/adminhome': (context) => HomeAdmin(),
-        // '/createcategory': (context) => CreateCategory(),
-        // '/products': (context) => Products(),
-        // '/createproducts': (context) => CreateProducts(),
-        // '/editproducts': (context) => EditProduct(),
-        // '/routes': (context) => Routes(),
-        // '/createroute': (context) => CreateRoute(),
-        // '/shops': (context) => Shops(),
-        // '/createshop': (context) => CreateShop(),
-        // '/employees': (context) => Employees(),
-        // '/createemployee': (context) => CreateEmployee(),
-        // '/employeedetails': (context) => EmployeeDetails(),
-        // '/editemployee': (context) => EditEmployee(),
-        // '/report': (context) => Report_Page(),
-        // '/individualbill': (context) => Individual_bill(),
-        // '/createindividualbill': (context) => Create_Individual_Bill(),
-        // '/savedroute': (context) => Collections_Route(),
-        // '/orderrecieved': (context) => OrdersRecieved(),
-        // '/allbills': (context) => AllBills(),
-        // '/billhistory': (context) => BillHistory(),
-        // '/billdetails1': (context) => BillDetails1(),
-        // '/admincstlist': (context) => AdminCstList(),
-        // '/admincstlist2': (context) => AdminCstList2(),
-        // '/adminprofile': (context) => Admin_Profile(),
-      },
       getPages: [
         GetPage(
             name: '/createstocklist',
@@ -422,11 +370,6 @@ class MyApp extends StatelessWidget {
             name: '/resetpassword',
             page: () {
               return const ResetPassword();
-            }),
-        GetPage(
-            name: '/pendingorder',
-            page: () {
-              return const PendingOrder();
             }),
         GetPage(
             name: '/stocklist2',
