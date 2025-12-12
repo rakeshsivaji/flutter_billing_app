@@ -1,13 +1,11 @@
 // ignore_for_file: avoid_print, depend_on_referenced_packages, unused_import
 
-// ignore_for_file: avoid_print, depend_on_referenced_packages, unused_import
-
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:billing_app/admin/createproducts.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -23,13 +21,11 @@ class CommonService {
     'Accept': 'application/json'
   };
 
-  ///Dev URL
-  // String baseUrl = 'http://bill-app.theapplicationdevelopers.in/api/V1';
-  ///Dev URL
-  String baseUrl = 'http://localhost:8000/api/V1';
   ///Release URL
-  // String baseUrl = 'https://garudaagencies.in/api/V1';
-  bool debug = true;
+  String baseUrl = 'https://garudaagencies.in/api/V1';
+  
+  /// Use Flutter's built-in debug mode for conditional logging
+  bool get debug => kDebugMode;
 
   Future<dynamic> signin(Map map) async {
     final SharedPreferences prefs = await _prefs;
