@@ -382,6 +382,13 @@ class CommonController extends GetxController {
     String? search,
     String? pathId,
     String? shopId}) async {
+    // Cache check: only skip if loading all shops without filters
+    if (!withLoader && search == null && pathId == null && shopId == null &&
+        shopsmodel.value != null && 
+        shopsmodel.value!.data.isNotEmpty) {
+      return true; // Data already exists, skip API call
+    }
+    
     if (withLoader) {
       isLoading(true);
     }
@@ -448,6 +455,13 @@ class CommonController extends GetxController {
   }
 
   Future<bool> getPath({required bool withLoader, String? search}) async {
+    // Cache check: if data exists and no search filter, skip reload
+    if (!withLoader && search == null && 
+        pathmodel.value != null && 
+        pathmodel.value!.data.isNotEmpty) {
+      return true; // Data already exists, skip API call
+    }
+    
     if (withLoader) {
       isLoading(true);
     }

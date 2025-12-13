@@ -107,11 +107,14 @@ class _HomeAdminState extends State<HomeAdmin> {
                     'அனைத்து பணியாளர்கள்',
                     style: TextStyle(fontSize: 13),
                   ),
-                  onTap: () async {
-                    await commonController.getEmployee(withLoader: true);
+                  onTap: () {
+                    // Navigate immediately, load data in background
                     Get.toNamed('/employees');
-
-                    // Navigator.pushReplacementNamed(context, '/employees');
+                    // Load data without blocking navigation
+                    if (commonController.employeemodel.value == null ||
+                        commonController.employeemodel.value!.data.isEmpty) {
+                      commonController.getEmployee(withLoader: false);
+                    }
                   },
                 ),
                 ListTile(
@@ -123,12 +126,16 @@ class _HomeAdminState extends State<HomeAdmin> {
                     'அனைத்து ரசிதுகள்',
                     style: TextStyle(fontSize: 13),
                   ),
-                  onTap: () async {
-                    await commonController.getTotalbills(withLoader: true);
-                    await commonController.getPath(withLoader: true);
+                  onTap: () {
+                    // Navigate immediately, load data in parallel in background
                     Get.toNamed('/allbills');
-
-                    // Navigator.pushReplacementNamed(context, '/allbills');
+                    // Load data in parallel without blocking navigation
+                    Future.wait([
+                      if (commonController.totalbillsModel.value == null)
+                        commonController.getTotalbills(withLoader: false),
+                      if (commonController.pathmodel.value == null)
+                        commonController.getPath(withLoader: false),
+                    ]);
                   },
                 ),
                 ListTile(
@@ -140,14 +147,19 @@ class _HomeAdminState extends State<HomeAdmin> {
                     'ஆர்டர்கள் பெறப்பட்டன',
                     style: TextStyle(fontSize: 13),
                   ),
-                  onTap: () async {
-                    await commonController.getPath(withLoader: false);
-                    await commonController.getReceivedorder(withLoader: false);
-                    await commonController.getTomorrowReceivedorder(
-                        withLoader: false);
-                    await commonController.getPendingReceivedorder(
-                        withLoader: false);
+                  onTap: () {
+                    // Navigate immediately, load data in parallel in background
                     Get.toNamed('/orderrecieved');
+                    // Load all orders in parallel without blocking navigation
+                    Future.wait([
+                      if (commonController.pathmodel.value == null)
+                        commonController.getPath(withLoader: false),
+                      commonController.getReceivedorder(withLoader: false),
+                      commonController.getTomorrowReceivedorder(
+                          withLoader: false),
+                      commonController.getPendingReceivedorder(
+                          withLoader: false),
+                    ]);
                   },
                 ),
                 ListTile(
@@ -159,12 +171,19 @@ class _HomeAdminState extends State<HomeAdmin> {
                     'பங்கு பட்டியலை உருவாக்கவும்',
                     style: TextStyle(fontSize: 13),
                   ),
-                  onTap: () async {
-                    await commonController.getOrderDelivery(withLoader: true);
-                    await commonController.getShops(withLoader: true);
-                    await commonController.getStock();
-                    await commonController.getNoAccessUsers();
+                  onTap: () {
+                    // Navigate immediately, load data in parallel in background
                     Get.toNamed('/admincstlist2');
+                    // Load data in parallel without blocking navigation
+                    Future.wait([
+                      if (commonController.orderdeliverymodel.value == null)
+                        commonController.getOrderDelivery(withLoader: false),
+                      if (commonController.shopsmodel.value == null ||
+                          commonController.shopsmodel.value!.data.isEmpty)
+                        commonController.getShops(withLoader: false),
+                      commonController.getStock(),
+                      commonController.getNoAccessUsers(),
+                    ]);
                   },
                 ),
                 ListTile(
@@ -176,11 +195,16 @@ class _HomeAdminState extends State<HomeAdmin> {
                     'கடையின் மீதமுள்ள தொகை',
                     style: TextStyle(fontSize: 13),
                   ),
-                  onTap: () async {
-                    await commonController.getShopsBalanceAmount(
-                        sortOrder: 'asc', withLoader: true);
-                    await commonController.getPath(withLoader: true);
+                  onTap: () {
+                    // Navigate immediately, load data in parallel in background
                     Get.toNamed('/shopsBalanceAmount');
+                    // Load data in parallel without blocking navigation
+                    Future.wait([
+                      commonController.getShopsBalanceAmount(
+                          sortOrder: 'asc', withLoader: false),
+                      if (commonController.pathmodel.value == null)
+                        commonController.getPath(withLoader: false),
+                    ]);
                   },
                 ),
                 GestureDetector(
@@ -279,25 +303,36 @@ class _HomeAdminState extends State<HomeAdmin> {
                         //   margin: EdgeInsets.only(bottom: 20),
                         // ),
                         GestureDetector(
-                          onTap: () async {
-                            await commonController.getOrderDelivery(
-                                withLoader: true);
-                            await commonController.getPath(withLoader: true);
+                          onTap: () {
+                            // Navigate immediately, load data in parallel in background
                             Get.toNamed('/adminorderscreen');
-                            // Navigator.pushNamed(context, '/Categories');
+                            // Load data in parallel without blocking navigation
+                            Future.wait([
+                              if (commonController.orderdeliverymodel.value == null)
+                                commonController.getOrderDelivery(
+                                    withLoader: false),
+                              if (commonController.pathmodel.value == null)
+                                commonController.getPath(withLoader: false),
+                            ]);
                           },
                           child: buildCard(context, 'ஆர்டர்கள்',
                               'assets/images/orderadmin.png', ''),
                         ),
                         GestureDetector(
-                          onTap: () async {
-                            await commonController.getReceivedorder(
-                                withLoader: false);
-                            await commonController.getTomorrowReceivedorder(
-                                withLoader: false);
-                            await commonController.getPendingReceivedorder(
-                                withLoader: false);
+                          onTap: () {
+                            // Navigate immediately, load data in parallel in background
                             Get.toNamed('/orderrecieved');
+                            // Load all orders in parallel without blocking navigation
+                            Future.wait([
+                              if (commonController.pathmodel.value == null)
+                                commonController.getPath(withLoader: false),
+                              commonController.getReceivedorder(
+                                  withLoader: false),
+                              commonController.getTomorrowReceivedorder(
+                                  withLoader: false),
+                              commonController.getPendingReceivedorder(
+                                  withLoader: false),
+                            ]);
                           },
                           // child: buildCard(context, 'ஆர்டர்கள் பெறப்பட்டன',
                           //     'assets/images/order1.png', ''),
@@ -382,10 +417,13 @@ class _HomeAdminState extends State<HomeAdmin> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         GestureDetector(
-                          onTap: () async {
-                            await commonController.getPath(withLoader: true);
+                          onTap: () {
+                            // Navigate immediately, load paths in background
                             Get.toNamed('/routes');
-                            // Navigator.pushNamed(context, '/routes');
+                            // Only load paths if not already loaded
+                            if (commonController.pathmodel.value == null) {
+                              commonController.getPath(withLoader: false);
+                            }
                           },
                           child: buildCard(context, 'பாதைகள்',
                               'assets/images/road.png', '/routes'),
@@ -409,20 +447,28 @@ class _HomeAdminState extends State<HomeAdmin> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         GestureDetector(
-                          onTap: () async {
-                            await commonController.getEmployee(
-                                withLoader: true);
+                          onTap: () {
+                            // Navigate immediately, load data in background
                             Get.toNamed('/employees');
+                            // Load data without blocking navigation
+                            if (commonController.employeemodel.value == null ||
+                                commonController.employeemodel.value!.data.isEmpty) {
+                              commonController.getEmployee(withLoader: false);
+                            }
                           },
                           child: buildCard(context, 'பணியாளர்கள்',
                               'assets/images/employees.png', '/employees'),
                         ),
                         GestureDetector(
-                          onTap: () async {
-                            await commonController.getCategories(
-                                withLoader: true);
+                          onTap: () {
+                            // Navigate immediately, load data in background
                             Get.toNamed('/categories');
-                            // Navigator.pushNamed(context, '/Categories');
+                            // Only load if not already cached
+                            if (commonController.categorymodel.value == null ||
+                                commonController.categorymodel.value!.data == null ||
+                                commonController.categorymodel.value!.data!.isEmpty) {
+                              commonController.getCategories(withLoader: false);
+                            }
                           },
                           child: buildCard(context, 'வகைகள்',
                               'assets/images/varieties.png', ''),
@@ -433,22 +479,36 @@ class _HomeAdminState extends State<HomeAdmin> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         GestureDetector(
-                          onTap: () async {
-                            await commonController.getPath(withLoader: true);
-                            await commonController.getIndBill(withLoader: true);
+                          onTap: () {
+                            // Navigate immediately, load data in parallel in background
                             Get.toNamed('/individualbill');
+                            // Load data in parallel without blocking navigation
+                            Future.wait([
+                              if (commonController.pathmodel.value == null)
+                                commonController.getPath(withLoader: false),
+                              if (commonController.individualBillModel.value == null)
+                                commonController.getIndBill(withLoader: false),
+                            ]);
                           },
                           child: buildCard(context, 'தனிப்பட்ட ரசிது',
                               'assets/images/homebill.png', '/individualbill'),
                         ),
                         GestureDetector(
-                          onTap: () async {
-                            await commonController.getallProduct(
-                                withLoader: true);
+                          onTap: () {
+                            // Navigate immediately, load data in parallel in background
                             Get.toNamed('/products');
-                            await commonController.getallCategories(
-                                withLoader: true);
-                            // Navigator.pushNamed(context, '/products');
+                            // Load data in parallel without blocking navigation
+                            Future.wait([
+                              if (commonController.productmodel.value == null ||
+                                  commonController.productmodel.value!.data.isEmpty)
+                                commonController.getallProduct(
+                                    withLoader: false),
+                              if (commonController.categorymodel.value == null ||
+                                  commonController.categorymodel.value!.data == null ||
+                                  commonController.categorymodel.value!.data!.isEmpty)
+                                commonController.getallCategories(
+                                    withLoader: false),
+                            ]);
                           },
                           child: buildCard(context, 'பொருள்கள்',
                               'assets/images/box.png', '/products'),
