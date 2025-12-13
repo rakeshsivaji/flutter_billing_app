@@ -391,11 +391,14 @@ class _HomeAdminState extends State<HomeAdmin> {
                               'assets/images/road.png', '/routes'),
                         ),
                         GestureDetector(
-                          onTap: () async {
-                            await commonController.getShops(withLoader: true);
-                            await commonController.getcreateshop();
-                            await commonController.getPath(withLoader: true);
+                          onTap: () {
+                            // Navigate immediately, load paths in background
+                            // Shops page will load filtered shops for first path
                             Get.toNamed('/shops');
+                            // Only load paths if not already loaded
+                            if (commonController.pathmodel.value == null) {
+                              commonController.getPath(withLoader: false);
+                            }
                           },
                           child: buildCard(context, 'கடைகள்',
                               'assets/images/shop.png', '/shops'),

@@ -26,6 +26,7 @@ class _ShopsState extends State<Shops> {
   final _pathStream = StreamController.broadcast();
   final _storeStream = StreamController.broadcast();
   final _storeListStream = StreamController.broadcast();
+  Timer? _searchDebounce;
 
   void showToast(String message) {
     Fluttertoast.showToast(
@@ -39,10 +40,62 @@ class _ShopsState extends State<Shops> {
     );
   }
 
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
     _pathStream.add(true);
+    _loadInitialData();
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    search.dispose();
+    _pathStream.close();
+    _storeStream.close();
+    _storeListStream.close();
+    super.dispose();
+  }
+
+  Future<void> _loadInitialData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    // First load paths if not already loaded
+    if (commonController.pathmodel.value == null) {
+      await commonController.getPath(withLoader: false);
+    }
+    
+    // Auto-select first path to reduce initial data load
+    if (commonController.pathmodel.value != null &&
+        commonController.pathmodel.value!.data.isNotEmpty) {
+      final firstPath = commonController.pathmodel.value!.data.first;
+      _selectedPathName = firstPath.pathId.toString();
+      
+      // Always load shops filtered by first path only (much faster)
+      // This ensures we only load shops for the first path, not all shops
+      await Future.wait([
+        commonController.getPathStore(_selectedPathName),
+        commonController.getShops(
+            withLoader: false, shopId: _selectedPathName),
+      ]);
+      
+      _storeStream.add(true);
+    } else {
+      // Fallback: load all shops if no paths available
+      if (commonController.shopsmodel.value == null ||
+          commonController.shopsmodel.value!.data.isEmpty) {
+        await commonController.getShops(withLoader: false);
+      }
+    }
+    
+    setState(() {
+      _isLoading = false;
+    });
+    _storeListStream.add(true);
   }
 
   @override
@@ -76,53 +129,58 @@ class _ShopsState extends State<Shops> {
                         const SizedBox(
                           height: 15.0,
                         ),
-                        // Container(
-                        //   width: MediaQuery.of(context).size.width,
-                        //   height: 50,
-                        //   padding: EdgeInsets.symmetric(horizontal: 10.0),
-                        //   decoration: BoxDecoration(
-                        //     borderRadius: BorderRadius.circular(25),
-                        //     color: Color.fromRGBO(250, 250, 250, 1),
-                        //     boxShadow: [
-                        //       BoxShadow(
-                        //         color: Colors.grey.withOpacity(0.5),
-                        //         spreadRadius: 1,
-                        //         blurRadius: 2,
-                        //         offset: Offset(0, 1),
-                        //       ),
-                        //     ],
-                        //   ),
-                        //   child: TextFormField(
-                        //     controller: search,
-                        //     onChanged: (value) {
-                        //       filterJobs(search: value);
-                        //     },
-                        //     decoration: InputDecoration(
-                        //       hintText: 'தேடு கடை',
-                        //       hintStyle: const TextStyle(
-                        //         color: Colors.grey,
-                        //         fontSize: 14,
-                        //         fontWeight: FontWeight.normal,
-                        //       ),
-                        //       border: OutlineInputBorder(
-                        //         borderSide: BorderSide.none,
-                        //       ),
-                        //       focusedBorder: OutlineInputBorder(
-                        //         borderSide: BorderSide.none,
-                        //       ),
-                        //       contentPadding:
-                        //           EdgeInsets.symmetric(horizontal: 20.0),
-                        //       suffixIcon: IconButton(
-                        //         onPressed: () {},
-                        //         icon: Image.asset(
-                        //           'assets/images/search.png',
-                        //           width: 20,
-                        //           height: 20,
-                        //         ),
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: 50,
+                          padding: EdgeInsets.symmetric(horizontal: 10.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(25),
+                            color: Color.fromRGBO(250, 250, 250, 1),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 1,
+                                blurRadius: 2,
+                                offset: Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: TextFormField(
+                            controller: search,
+                            onChanged: (value) {
+                              // Debounce search to avoid too many API calls
+                              _searchDebounce?.cancel();
+                              _searchDebounce = Timer(const Duration(milliseconds: 500), () {
+                                filterJobs(search: value);
+                              });
+                            },
+                            decoration: InputDecoration(
+                              hintText: 'தேடு கடை',
+                              hintStyle: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
+                                fontWeight: FontWeight.normal,
+                              ),
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide.none,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 20.0),
+                              suffixIcon: IconButton(
+                                onPressed: () {},
+                                icon: Image.asset(
+                                  'assets/images/search.png',
+                                  width: 20,
+                                  height: 20,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 15),
                         _buildShopNameAndPathNameFilterDropdown(),
                         const SizedBox(
                           height: 20,
@@ -130,12 +188,33 @@ class _ShopsState extends State<Shops> {
                         StreamBuilder(
                             stream: _storeListStream.stream,
                             builder: (context, snapshot) {
+                              if (_isLoading) {
+                                return const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(20.0),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              }
                               return Container(
                                 child: Obx(() {
                                   final shops =
                                       commonController.shopsmodel.value?.data;
-                                  if (shops == null || shops.isEmpty) {
-                                    return const Text('கடைகள் இல்லை');
+                                  if (shops == null) {
+                                    return const Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(20.0),
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    );
+                                  }
+                                  if (shops.isEmpty) {
+                                    return const Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(20.0),
+                                        child: Text('கடைகள் இல்லை'),
+                                      ),
+                                    );
                                   }
                                   return ListView.builder(
                                     itemCount: shops.length ?? 0,
@@ -182,10 +261,33 @@ class _ShopsState extends State<Shops> {
   filterJobs({
     String? search,
   }) async {
-    commonController.getShops(
-      withLoader: false,
-      search: search,
-    );
+    if (search == null || search.isEmpty) {
+      // If search is empty, reload all shops
+      setState(() {
+        _isLoading = true;
+      });
+      await commonController.getShops(
+        withLoader: false,
+        search: null,
+      );
+      setState(() {
+        _isLoading = false;
+      });
+      _storeListStream.add(true);
+    } else {
+      // Filter with search
+      setState(() {
+        _isLoading = true;
+      });
+      await commonController.getShops(
+        withLoader: false,
+        search: search,
+      );
+      setState(() {
+        _isLoading = false;
+      });
+      _storeListStream.add(true);
+    }
   }
 
   Container buildCard(ShopData data) {
@@ -399,8 +501,14 @@ class _ShopsState extends State<Shops> {
     try {
       if (response['status'] == 1) {
         showToast(response['message']);
-        await commonController.getShops(withLoader: true);
-        Get.toNamed('/shops');
+        setState(() {
+          _isLoading = true;
+        });
+        await commonController.getShops(withLoader: false);
+        setState(() {
+          _isLoading = false;
+        });
+        _storeListStream.add(true);
       } else {
         showToast(response['message'] ?? 'பிழை ஏற்பட்டது');
       }
@@ -434,9 +542,17 @@ class _ShopsState extends State<Shops> {
                 (onChangeValue) async {
                   _selectedPathName = onChangeValue.toString();
                   _selectedShopName = '';
-                  await commonController.getPathStore(_selectedPathName);
-                  await commonController.getShops(
-                      withLoader: true, shopId: _selectedPathName);
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  await Future.wait([
+                    commonController.getPathStore(_selectedPathName),
+                    commonController.getShops(
+                        withLoader: false, shopId: _selectedPathName),
+                  ]);
+                  setState(() {
+                    _isLoading = false;
+                  });
                   _storeListStream.add(true);
                   _storeStream.add(true);
                 },
@@ -462,10 +578,16 @@ class _ShopsState extends State<Shops> {
                     [],
                 (onChangeValue) async {
                   _selectedShopName = onChangeValue.toString();
+                  setState(() {
+                    _isLoading = true;
+                  });
                   await commonController.getShops(
-                      withLoader: true,
+                      withLoader: false,
                       shopId: _selectedPathName,
                       pathId: _selectedShopName);
+                  setState(() {
+                    _isLoading = false;
+                  });
                   _storeListStream.add(true);
                 },
               );
