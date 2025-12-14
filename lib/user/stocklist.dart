@@ -174,16 +174,20 @@ class _StocklistState extends State<Stocklist> {
               child: Text('வேறு தகவல்கள் இல்லை'),
             ),
           ] else ...[
-            ListView.builder(
-                itemCount:
-                    commonController.newstocklistmodel.value?.data.length,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(0),
-                itemBuilder: ((context, index) {
-                  return buildCardItem(
-                      commonController.newstocklistmodel.value?.data[index]);
-                })),
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.4,
+              ),
+              child: ListView.builder(
+                  itemCount:
+                      commonController.newstocklistmodel.value?.data.length,
+                  shrinkWrap: false,
+                  padding: const EdgeInsets.all(0),
+                  itemBuilder: ((context, index) {
+                    return buildCardItem(
+                        commonController.newstocklistmodel.value?.data[index]);
+                  })),
+            ),
           ],
           // Container(
           //   child: Obx(

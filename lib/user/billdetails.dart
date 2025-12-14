@@ -286,17 +286,21 @@ class _BillDetailsState extends State<BillDetails> {
           const SizedBox(
             height: 15.0,
           ),
-          Container(
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.3,
+            ),
             child: Obx(() {
               final billdetails = commonController
                   .getUserBillDetailsModel.value?.data?.orderItems;
               if (billdetails == null || billdetails.isEmpty) {
-                return const Text('பொருள்கள் எதுவும் இல்லை.');
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20.0),
+                  child: Text('பொருள்கள் எதுவும் இல்லை.'),
+                );
               }
               return ListView.builder(
                 itemCount: billdetails.length,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(0),
                 itemBuilder: ((context, index) {
                   return buildCardItem(billdetails[index]);
@@ -410,15 +414,12 @@ class _BillDetailsState extends State<BillDetails> {
               ),
             ],
           ),
-          Container(
-            child: ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: data.items?.length,
-              itemBuilder: (BuildContext context, int index) {
-                return _buildItemsCard(data.items?[index]);
-              },
-            ),
+          ListView.builder(
+            shrinkWrap: false,
+            itemCount: data.items?.length,
+            itemBuilder: (BuildContext context, int index) {
+              return _buildItemsCard(data.items?[index]);
+            },
           )
         ],
       ),
@@ -535,16 +536,21 @@ class _BillDetailsState extends State<BillDetails> {
                   ],
                 ),
                 const Divider(),
-                Container(
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: 300,
+                  ),
                   child: Obx(() {
                     final billdetails = commonController
                         .getUserBillDetailsModel.value?.data?.orderItems;
                     if (billdetails == null || billdetails.isEmpty) {
-                      return const Text('பாதைகள் எதுவும் இல்லை.');
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20.0),
+                        child: Text('பாதைகள் எதுவும் இல்லை.'),
+                      );
                     }
                     return ListView.builder(
                       itemCount: billdetails.length,
-                      shrinkWrap: true,
                       padding: const EdgeInsets.all(0),
                       itemBuilder: ((context, index) {
                         return buildCardItem(billdetails[index]);

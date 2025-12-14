@@ -124,98 +124,102 @@ class _PendingOrderState extends State<PendingOrder> {
                           BorderRadius.vertical(top: Radius.circular(30)),
                       color: Colors.white,
                     ),
-                    child: SingleChildScrollView(
-                      child: Obx(() {
-                        return Column(
-                          children: [
-                            const SizedBox(
-                              height: 25.0,
+                    child: Obx(() {
+                      if (commonController.pendingList == true) {
+                        return CustomScrollView(
+                          slivers: [
+                            const SliverPadding(
+                              padding: EdgeInsets.only(top: 25.0),
                             ),
-                            const SelectableText('நிலுவையில் உள்ள பட்டியல்'),
-                            const SizedBox(
-                              height: 25.0,
+                            const SliverToBoxAdapter(
+                              child: SelectableText('நிலுவையில் உள்ள பட்டியல்'),
                             ),
-                            // commonController.pendingList
-                            //     ? ListView.builder(
-                            //         itemCount: commonController.pendingOrderModel
-                            //             .value!.data.pendingItem.finalData.length,
-                            //         shrinkWrap: true,
-                            //         physics: NeverScrollableScrollPhysics(),
-                            //         padding: EdgeInsets.all(0),
-                            //         itemBuilder: ((context, index) {
-                            //           ischecked.add(false);
-                            //           return buildItem1(
-                            //               index,
-                            //               commonController
-                            //                   .pendingOrderModel
-                            //                   .value!
-                            //                   .data
-                            //                   .pendingItem
-                            //                   .finalData[index]);
-                            //         }))
-                            //     : Text('No data Found'),
-                            if (commonController.pendingList == true) ...[
-                              Container(
-                                child: Obx(
-                                  () {
-                                    final pending = commonController
-                                        .pendingOrderModel
-                                        .value
-                                        ?.data
-                                        .pendingItem
-                                        .finalData;
-                                    if (pending == null || pending.isEmpty) {
-                                      return const Text(
-                                          'நிலுவையில் உள்ள உத்தரவு இல்லை');
-                                    }
-                                    return ListView.builder(
-                                        itemCount: pending.length,
-                                        shrinkWrap: true,
-                                        physics:
-                                            const NeverScrollableScrollPhysics(),
-                                        padding: const EdgeInsets.all(0),
-                                        itemBuilder: ((context, index) {
-                                          ischecked.add(false);
-                                          return buildItem1(
-                                              index, pending[index]);
-                                        }));
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 15.0, vertical: 18.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Padding(
-                                      padding: EdgeInsets.only(left: 35.0),
-                                      child: SelectableText(
-                                        'மொத்தம்',
-                                        style: TextStyle(fontSize: 15),
+                            const SliverPadding(
+                              padding: EdgeInsets.only(top: 25.0),
+                            ),
+                            SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) {
+                                  final pending = commonController
+                                      .pendingOrderModel
+                                      .value
+                                      ?.data
+                                      .pendingItem
+                                      .finalData;
+                                  if (pending == null || pending.isEmpty) {
+                                    return const Padding(
+                                      padding: EdgeInsets.only(top: 50.0),
+                                      child: Center(
+                                        child: Text(
+                                            'நிலுவையில் உள்ள உத்தரவு இல்லை'),
                                       ),
-                                    ),
-                                    SelectableText(
-                                      '₹ ' +
-                                          commonController.pendingOrderModel
-                                              .value!.data.pendingItem.total
-                                              .toString(),
-                                      style: const TextStyle(fontSize: 15),
-                                    ),
-                                  ],
-                                ),
+                                    );
+                                  }
+                                  
+                                  // Initialize checkbox array if needed
+                                  if (ischecked.length < pending.length) {
+                                    ischecked.addAll(List.filled(pending.length - ischecked.length, false));
+                                  }
+                                  
+                                  if (index < pending.length) {
+                                    return buildItem1(index, pending[index]);
+                                  } else if (index == pending.length) {
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 15.0, vertical: 18.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Padding(
+                                            padding: EdgeInsets.only(left: 35.0),
+                                            child: SelectableText(
+                                              'மொத்தம்',
+                                              style: TextStyle(fontSize: 15),
+                                            ),
+                                          ),
+                                          SelectableText(
+                                            '₹ ' +
+                                                commonController
+                                                    .pendingOrderModel
+                                                    .value!
+                                                    .data
+                                                    .pendingItem
+                                                    .total
+                                                    .toString(),
+                                            style: const TextStyle(fontSize: 15),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }
+                                  return null;
+                                },
+                                childCount: (commonController
+                                            .pendingOrderModel
+                                            .value
+                                            ?.data
+                                            .pendingItem
+                                            .finalData
+                                            .length ??
+                                        0) +
+                                    1,
                               ),
-                              const SizedBox(
-                                height: 100.0,
-                              ),
-                            ] else ...[
-                              const Text('வேறு தகவல்கள் இல்லை'),
-                            ],
+                            ),
+                            const SliverPadding(
+                              padding: EdgeInsets.only(bottom: 100.0),
+                            ),
                           ],
                         );
-                      }),
-                    ),
+                      } else {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 50.0),
+                            child: Text('வேறு தகவல்கள் இல்லை'),
+                          ),
+                        );
+                      }
+                    }),
                   ),
                 )
               ],

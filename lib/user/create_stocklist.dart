@@ -342,13 +342,10 @@ class _Create_Stocklist_ScreenState extends State<Create_Stocklist_Screen>
                               if (commonController.stock == false) ...[
                                 const Text('வேறு தகவல்கள் இல்லை'),
                               ] else ...[
-                                Container(
+                                Expanded(
                                   child: ListView.builder(
                                     itemCount: commonController.stockModel
                                         .value!.data.stockItem.finalData.length,
-                                    shrinkWrap: true,
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
                                     padding: const EdgeInsets.all(0),
                                     itemBuilder: ((context, index) {
                                       return buildItem(commonController

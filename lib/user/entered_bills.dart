@@ -189,88 +189,86 @@ class _EnteredBillsState extends State<EnteredBills> {
                   borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
                   color: Colors.white,
                 ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      const SizedBox(
-                        height: 25.0,
-                      ),
-                      InkWell(
-                        onTap: () {
-                          print('inside the date on tap');
-                          _selectDateRange(context);
-                        },
-                        child: Container(
-                          width: 250,
-                          height: 50,
-                          decoration: BoxDecoration(
-                              color: Colors.grey[100],
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: Colors.grey.withOpacity(0.5),
-                              )),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              const Icon(Icons.calendar_month),
-                              Text(
-                                '${_startDate.year}-${_startDate.month}-${_startDate.day} to ${_endDate.year}-${_endDate.month}-${_endDate.day}',
+                child: Column(
+                  children: [
+                    const SizedBox(
+                      height: 25.0,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        print('inside the date on tap');
+                        _selectDateRange(context);
+                      },
+                      child: Container(
+                        width: 250,
+                        height: 50,
+                        decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: Colors.grey.withOpacity(0.5),
+                            )),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            const Icon(Icons.calendar_month),
+                            Text(
+                              '${_startDate.year}-${_startDate.month}-${_startDate.day} to ${_endDate.year}-${_endDate.month}-${_endDate.day}',
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                _selectDateRange(context);
+                              },
+                              child: Image.asset(
+                                'assets/images/arrowdown.png',
+                                width: 13,
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  _selectDateRange(context);
-                                },
-                                child: Image.asset(
-                                  'assets/images/arrowdown.png',
-                                  width: 13,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(
-                        height: 25.0,
-                      ),
-                      // _buildSelectStoreDropdown(),
-                      /*_buildSearchField(),
-                      SizedBox(
-                        height: 30,
-                      ),*/
-                      _buildShopNameAndPathNameFilterDropdown(),
-                      const SizedBox(
-                        height: 25.0,
-                      ),
-                      StreamBuilder(
+                    ),
+                    const SizedBox(
+                      height: 25.0,
+                    ),
+                    // _buildSelectStoreDropdown(),
+                    /*_buildSearchField(),
+                    SizedBox(
+                      height: 30,
+                    ),*/
+                    _buildShopNameAndPathNameFilterDropdown(),
+                    const SizedBox(
+                      height: 25.0,
+                    ),
+                    Expanded(
+                      child: StreamBuilder(
                           stream: _listStream.stream,
                           builder: (context, snapshot) {
-                            return Container(
-                              child: Obx(() {
-                                final allbillentry = commonController
-                                    .getAllUserBillModel.value?.data;
-                                if (allbillentry == null ||
-                                    allbillentry.isEmpty ||
-                                    commonController.getExistingBills ==
-                                        false) {
-                                  return const Text('ரசீதுகள் எதுவும் இல்லை.');
-                                }
-                                return ListView.builder(
-                                  itemCount: allbillentry.length,
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  padding: const EdgeInsets.all(0),
-                                  itemBuilder: ((context, index) {
-                                    return buildCard(allbillentry[index]);
-                                  }),
+                            return Obx(() {
+                              final allbillentry = commonController
+                                  .getAllUserBillModel.value?.data;
+                              if (allbillentry == null ||
+                                  allbillentry.isEmpty ||
+                                  commonController.getExistingBills ==
+                                      false) {
+                                return const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.only(top: 50.0),
+                                    child: Text('ரசீதுகள் எதுவும் இல்லை.'),
+                                  ),
                                 );
-                              }),
-                            );
+                              }
+                              return ListView.builder(
+                                itemCount: allbillentry.length,
+                                padding: const EdgeInsets.only(bottom: 60),
+                                itemBuilder: ((context, index) {
+                                  return buildCard(allbillentry[index]);
+                                }),
+                              );
+                            });
                           }),
-                      const SizedBox(
-                        height: 60,
-                      )
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             )

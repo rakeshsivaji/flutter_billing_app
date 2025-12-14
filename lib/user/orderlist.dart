@@ -266,37 +266,33 @@ class _OrderlistState extends State<Orderlist>
                                     horizontal: 20.0),
                                 child: Stack(
                                   children: [
-                                    SingleChildScrollView(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          if (commonController.orderList ==
-                                              false) ...[
-                                            const Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Text('வேறு தகவல்கள் இல்லை'),
-                                              ],
-                                            ),
-                                          ] else ...[
-                                            Container(
-                                              child: ListView.builder(
-                                                itemCount: commonController
+                                    if (commonController.orderList == false) ...[
+                                      const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.only(top: 50.0),
+                                          child: Text('வேறு தகவல்கள் இல்லை'),
+                                        ),
+                                      ),
+                                    ] else ...[
+                                      CustomScrollView(
+                                        slivers: [
+                                          SliverList(
+                                            delegate: SliverChildBuilderDelegate(
+                                              (context, index) {
+                                                final dataLength = commonController
                                                     .orderListModel
                                                     .value!
                                                     .data
                                                     .orderListItem
                                                     .finalData
-                                                    .length,
-                                                shrinkWrap: true,
-                                                padding:
-                                                    const EdgeInsets.all(0),
-                                                physics:
-                                                    const NeverScrollableScrollPhysics(),
-                                                itemBuilder: ((context, index) {
-                                                  ischecked.add(false);
+                                                    .length;
+                                                
+                                                // Initialize checkbox array if needed
+                                                if (ischecked.length < dataLength) {
+                                                  ischecked.addAll(List.filled(dataLength - ischecked.length, false));
+                                                }
+                                                
+                                                if (index < dataLength) {
                                                   return buildItem(
                                                       index,
                                                       commonController
@@ -305,50 +301,60 @@ class _OrderlistState extends State<Orderlist>
                                                           .data
                                                           .orderListItem
                                                           .finalData[index]);
-                                                }),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 15.0,
-                                                      vertical: 18.0),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  const Padding(
-                                                    padding: EdgeInsets.only(
-                                                        left: 35.0),
-                                                    child: SelectableText(
-                                                      'மொத்தம்',
-                                                      style: TextStyle(
-                                                          fontSize: 15),
+                                                } else if (index == dataLength) {
+                                                  return Padding(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                            horizontal: 15.0,
+                                                            vertical: 18.0),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        const Padding(
+                                                          padding: EdgeInsets.only(
+                                                              left: 35.0),
+                                                          child: SelectableText(
+                                                            'மொத்தம்',
+                                                            style: TextStyle(
+                                                                fontSize: 15),
+                                                          ),
+                                                        ),
+                                                        SelectableText(
+                                                          '₹ ' +
+                                                              commonController
+                                                                  .orderListModel
+                                                                  .value!
+                                                                  .data
+                                                                  .orderListItem
+                                                                  .total
+                                                                  .toString(),
+                                                          style: const TextStyle(
+                                                              fontSize: 15),
+                                                        ),
+                                                      ],
                                                     ),
-                                                  ),
-                                                  SelectableText(
-                                                    '₹ ' +
-                                                        commonController
-                                                            .orderListModel
-                                                            .value!
-                                                            .data
-                                                            .orderListItem
-                                                            .total
-                                                            .toString(),
-                                                    style: const TextStyle(
-                                                        fontSize: 15),
-                                                  ),
-                                                ],
-                                              ),
+                                                  );
+                                                }
+                                                return null;
+                                              },
+                                              childCount: commonController
+                                                      .orderListModel
+                                                      .value!
+                                                      .data
+                                                      .orderListItem
+                                                      .finalData
+                                                      .length +
+                                                  1,
                                             ),
-                                            const SizedBox(
-                                              height: 100.0,
-                                            ),
-                                          ],
+                                          ),
+                                          const SliverPadding(
+                                            padding: EdgeInsets.only(bottom: 100.0),
+                                          ),
                                         ],
                                       ),
-                                    ),
+                                    ],
                                     Align(
                                       alignment: Alignment.bottomCenter,
                                       child: Container(
@@ -419,35 +425,34 @@ class _OrderlistState extends State<Orderlist>
                                     horizontal: 20.0),
                                 child: Stack(
                                   children: [
-                                    SingleChildScrollView(
-                                      child: Column(
-                                        children: [
-                                          if (commonController.tomorrowList ==
-                                              false) ...[
-                                            const Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Text('வேறு தகவல்கள் இல்லை'),
-                                              ],
-                                            ),
-                                          ] else ...[
-                                            Container(
-                                              child: ListView.builder(
-                                                itemCount: commonController
-                                                    .tomorrowOrderListModel
-                                                    .value
-                                                    ?.data
-                                                    .orderListItem
-                                                    .tomorrowFinalData
-                                                    .length,
-                                                shrinkWrap: true,
-                                                padding:
-                                                    const EdgeInsets.all(0),
-                                                physics:
-                                                    const NeverScrollableScrollPhysics(),
-                                                itemBuilder: ((context, index) {
-                                                  isCheck.add(false);
+                                    if (commonController.tomorrowList == false) ...[
+                                      const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.only(top: 50.0),
+                                          child: Text('வேறு தகவல்கள் இல்லை'),
+                                        ),
+                                      ),
+                                    ] else ...[
+                                      CustomScrollView(
+                                        slivers: [
+                                          SliverList(
+                                            delegate: SliverChildBuilderDelegate(
+                                              (context, index) {
+                                                final dataLength = commonController
+                                                        .tomorrowOrderListModel
+                                                        .value
+                                                        ?.data
+                                                        .orderListItem
+                                                        .tomorrowFinalData
+                                                        .length ??
+                                                    0;
+                                                
+                                                // Initialize checkbox array if needed
+                                                if (isCheck.length < dataLength) {
+                                                  isCheck.addAll(List.filled(dataLength - isCheck.length, false));
+                                                }
+                                                
+                                                if (index < dataLength) {
                                                   return buildItem1(
                                                       index,
                                                       commonController
@@ -456,50 +461,61 @@ class _OrderlistState extends State<Orderlist>
                                                           .data
                                                           .orderListItem
                                                           .tomorrowFinalData[index]);
-                                                }),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 15.0,
-                                                      vertical: 18.0),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  const Padding(
-                                                    padding: EdgeInsets.only(
-                                                        left: 35.0),
-                                                    child: SelectableText(
-                                                      'மொத்தம்',
-                                                      style: TextStyle(
-                                                          fontSize: 15),
+                                                } else if (index == dataLength) {
+                                                  return Padding(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                            horizontal: 15.0,
+                                                            vertical: 18.0),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        const Padding(
+                                                          padding: EdgeInsets.only(
+                                                              left: 35.0),
+                                                          child: SelectableText(
+                                                            'மொத்தம்',
+                                                            style: TextStyle(
+                                                                fontSize: 15),
+                                                          ),
+                                                        ),
+                                                        SelectableText(
+                                                          '₹ ' +
+                                                              commonController
+                                                                  .tomorrowOrderListModel
+                                                                  .value!
+                                                                  .data
+                                                                  .orderListItem
+                                                                  .total
+                                                                  .toString(),
+                                                          style: const TextStyle(
+                                                              fontSize: 15),
+                                                        ),
+                                                      ],
                                                     ),
-                                                  ),
-                                                  SelectableText(
-                                                    '₹ ' +
-                                                        commonController
-                                                            .tomorrowOrderListModel
-                                                            .value!
-                                                            .data
-                                                            .orderListItem
-                                                            .total
-                                                            .toString(),
-                                                    style: const TextStyle(
-                                                        fontSize: 15),
-                                                  ),
-                                                ],
-                                              ),
+                                                  );
+                                                }
+                                                return null;
+                                              },
+                                              childCount: (commonController
+                                                      .tomorrowOrderListModel
+                                                      .value
+                                                      ?.data
+                                                      .orderListItem
+                                                      .tomorrowFinalData
+                                                      .length ??
+                                                  0) +
+                                                  1,
                                             ),
-                                            const SizedBox(
-                                              height: 100,
-                                            ),
-                                          ],
+                                          ),
+                                          const SliverPadding(
+                                            padding: EdgeInsets.only(bottom: 100.0),
+                                          ),
                                         ],
                                       ),
-                                    ),
+                                    ],
                                     Align(
                                       alignment: Alignment.bottomCenter,
                                       child: Container(

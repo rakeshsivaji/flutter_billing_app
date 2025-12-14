@@ -635,20 +635,22 @@ class _ShopbillsState extends State<Shopbills> {
           const SizedBox(
             height: 10.0,
           ),
-          Container(
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.3,
+            ),
             child: Obx(
               () {
                 final items =
                     commonController.orderDetailsModel.value?.data?.totalOrders;
                 if (items?.isEmpty == true) {
-                  return const Text('ஆர்டர் பட்டியல் இல்லை');
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20.0),
+                    child: Text('ஆர்டர் பட்டியல் இல்லை'),
+                  );
                 }
-                // return Text('Here');
-                // else {
                 return ListView.builder(
                   itemCount: items?.length,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
                   padding: const EdgeInsets.all(0),
                   itemBuilder: ((context, index) {
                     return buildCardItem(items?[index]);
@@ -698,15 +700,12 @@ class _ShopbillsState extends State<Shopbills> {
             style: const TextStyle(fontWeight: FontWeight.w500),
           ),
         ),
-        Container(
-          child: ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: data?.orderItem?.length,
-            itemBuilder: (context, index) {
-              return _buildCardItemList(data?.orderItem?[index]);
-            },
-          ),
+        ListView.builder(
+          shrinkWrap: false,
+          itemCount: data?.orderItem?.length,
+          itemBuilder: (context, index) {
+            return _buildCardItemList(data?.orderItem?[index]);
+          },
         ),
       ],
     );

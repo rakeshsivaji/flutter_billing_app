@@ -414,19 +414,22 @@ class _New_StockState extends State<New_Stock> {
                       const SizedBox(
                         height: 10,
                       ),
-                      Container(child: Obx(() {
-                        final userreport = commonController
-                            .userlinereportmodel.value!.data.delivery.products;
-                        return ListView.builder(
-                          itemCount: userreport.length,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          padding: const EdgeInsets.all(0),
-                          itemBuilder: ((context, index) {
-                            return linebuild1(userreport[index]);
-                          }),
-                        );
-                      })),
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: 200,
+                        ),
+                        child: Obx(() {
+                          final userreport = commonController
+                              .userlinereportmodel.value!.data.delivery.products;
+                          return ListView.builder(
+                            itemCount: userreport.length,
+                            padding: const EdgeInsets.all(0),
+                            itemBuilder: ((context, index) {
+                              return linebuild1(userreport[index]);
+                            }),
+                          );
+                        }),
+                      ),
                       const SizedBox(
                         height: 10,
                       ),
@@ -810,14 +813,17 @@ class _New_StockState extends State<New_Stock> {
                   height: 30,
                 ),
               ],
-              ListView.builder(
-                itemCount: data?.totalProductPending.length,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.zero,
-                itemBuilder: (context, index) {
-                  return buildItems(data?.totalProductPending[index]);
-                },
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.3,
+                ),
+                child: ListView.builder(
+                  itemCount: data?.totalProductPending.length,
+                  padding: EdgeInsets.zero,
+                  itemBuilder: (context, index) {
+                    return buildItems(data?.totalProductPending[index]);
+                  },
+                ),
               ),
               const SizedBox(
                 height: 10.0,
