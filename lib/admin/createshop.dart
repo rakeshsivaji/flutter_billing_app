@@ -2,9 +2,11 @@ import 'package:billing_app/Models/createshop_Model.dart';
 import 'package:billing_app/controllers/common_controller.dart';
 import 'package:billing_app/services/common_service.dart';
 import 'package:billing_app/widgets/customappbar.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class CreateShop extends StatefulWidget {
   const CreateShop({super.key});
@@ -47,10 +49,32 @@ class _CreateShopState extends State<CreateShop> {
   List<String> dropdownValues = [];
   bool clicked = false;
 
+  // Custom cache manager for product images with longer cache duration
+  static final CacheManager customCacheManager = CacheManager(
+    Config(
+      'productImagesCache',
+      stalePeriod: const Duration(days: 30),
+      maxNrOfCacheObjects: 1000,
+    ),
+  );
+
   @override
   void initState() {
     super.initState();
     //fetchDropdownValues();
+  }
+
+  // Preload product images for faster display
+  void preloadProductImages() {
+    if (commonController.createShopModel.value?.data.product != null) {
+      final products = commonController.createShopModel.value!.data.product;
+      for (var product in products) {
+        if (product.image.isNotEmpty) {
+          // Preload image into cache
+          customCacheManager.getFileStream(product.image).listen((_) {});
+        }
+      }
+    }
   }
 
   void getData() async {
@@ -287,6 +311,8 @@ class _CreateShopState extends State<CreateShop> {
                               InkWell(
                                 onTap: () async {
                                   await commonController.getcreateshop();
+                                  // Preload images in background
+                                  preloadProductImages();
                                   showBottomSheet(
                                     context,
                                   );
@@ -565,12 +591,15 @@ class _CreateShopState extends State<CreateShop> {
                                     .createShopModel.value?.data.product.length,
                                 shrinkWrap: true,
                                 physics: const NeverScrollableScrollPhysics(),
+                                cacheExtent: 500,
                                 itemBuilder: ((context, index) {
-                                  return buildRow(commonController
-                                      .createShopModel
-                                      .value!
-                                      .data
-                                      .product[index]);
+                                  return RepaintBoundary(
+                                    child: buildRow(commonController
+                                        .createShopModel
+                                        .value!
+                                        .data
+                                        .product[index]),
+                                  );
                                 }),
                               );
                               /*     */
@@ -673,10 +702,52 @@ class _CreateShopState extends State<CreateShop> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.network(
-                data.image,
+              CachedNetworkImage(
+                imageUrl: data.image,
                 width: 30,
                 height: 30,
+                fit: BoxFit.cover,
+                cacheManager: customCacheManager,
+                memCacheWidth: 60,
+                memCacheHeight: 60,
+                maxWidthDiskCache: 120,
+                maxHeightDiskCache: 120,
+                fadeInDuration: const Duration(milliseconds: 100),
+                fadeOutDuration: const Duration(milliseconds: 50),
+                useOldImageOnUrlChange: true,
+                filterQuality: FilterQuality.low,
+                placeholderFadeInDuration: const Duration(milliseconds: 50),
+                placeholder: (context, url) => Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Center(
+                    child: SizedBox(
+                      width: 10,
+                      height: 10,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 1.5,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+                      ),
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Icon(
+                    Icons.image_not_supported,
+                    size: 18,
+                    color: Colors.grey,
+                  ),
+                ),
               ),
               const SizedBox(
                 width: 35.0,

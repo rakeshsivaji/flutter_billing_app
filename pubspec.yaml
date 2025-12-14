@@ -52,6 +52,7 @@ dependencies:
   provider:
   flutter_thermal_printer:
   pos_universal_printer:
+  cached_network_image: ^3.3.1
 
   http_parser: any
 flutter_launcher_icons:
