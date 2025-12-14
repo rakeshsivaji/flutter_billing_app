@@ -70,7 +70,6 @@ class BuildCard extends StatelessWidget {
                 ),
                 Text(
                   '₹ 112',
-                  style: TextStyle(),
                 ),
               ],
             ),

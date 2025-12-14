@@ -502,12 +502,12 @@ class _ShopbillsState extends State<Shopbills> {
                                             },
                                             child: Container(
                                               height: 60,
-                                              padding: EdgeInsets.symmetric(
+                                              padding: const EdgeInsets.symmetric(
                                                   horizontal: 0.0),
                                               decoration: BoxDecoration(
                                                 borderRadius:
                                                     BorderRadius.circular(8),
-                                                color: Color.fromRGBO(
+                                                color: const Color.fromRGBO(
                                                     120, 89, 207, 1),
                                               ),
                                               child: Row(
@@ -518,10 +518,10 @@ class _ShopbillsState extends State<Shopbills> {
                                                     'assets/images/print.png',
                                                     width: 20,
                                                   ),
-                                                  SizedBox(
+                                                  const SizedBox(
                                                     width: 10.0,
                                                   ),
-                                                  Text(
+                                                  const Text(
                                                     'அச்சு',
                                                     style: TextStyle(
                                                         color: Colors.white,
@@ -533,7 +533,7 @@ class _ShopbillsState extends State<Shopbills> {
                                             ),
                                           ),
                                         ),
-                                        SizedBox(
+                                        const SizedBox(
                                           width: 20.0,
                                         ),
                                         Expanded(

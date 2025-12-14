@@ -415,7 +415,7 @@ class _New_StockState extends State<New_Stock> {
                         height: 10,
                       ),
                       ConstrainedBox(
-                        constraints: BoxConstraints(
+                        constraints: const BoxConstraints(
                           maxHeight: 200,
                         ),
                         child: Obx(() {

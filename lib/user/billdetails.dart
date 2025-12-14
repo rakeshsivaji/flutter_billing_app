@@ -352,7 +352,7 @@ class _BillDetailsState extends State<BillDetails> {
                       'மொத்த கட்டணத் தொகை',
                       style: TextStyle(color: Colors.green),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 3.0,
                     ),
                     SelectableText(
@@ -537,7 +537,7 @@ class _BillDetailsState extends State<BillDetails> {
                 ),
                 const Divider(),
                 ConstrainedBox(
-                  constraints: BoxConstraints(
+                  constraints: const BoxConstraints(
                     maxHeight: 300,
                   ),
                   child: Obx(() {

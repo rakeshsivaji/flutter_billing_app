@@ -44,7 +44,7 @@ class _UserPendingReceiptState extends State<UserPendingReceipt> {
             onPressed: () {
               // Temporarily disabled for testing
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Bluetooth printing not available')),
+                const SnackBar(content: Text('Bluetooth printing not available')),
               );
             },
             icon: const Icon(Icons.settings),

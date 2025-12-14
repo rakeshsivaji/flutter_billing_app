@@ -144,7 +144,7 @@ class _BillDetailsReceiptState extends State<BillDetailsReceipt> {
         content: Container(
           width: double.maxFinite,
           child: _isLoading
-              ? Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator())
               : ListView.builder(
                   shrinkWrap: true,
                   itemCount: _devices.length,
@@ -160,7 +160,7 @@ class _BillDetailsReceiptState extends State<BillDetailsReceipt> {
                       title: Text(device.name ?? 'Unknown Device'),
                       subtitle: Text(device.macAdress),
                       trailing: _selectedDevice?.macAdress == device.macAdress
-                          ? Icon(Icons.check, color: Colors.green)
+                          ? const Icon(Icons.check, color: Colors.green)
                           : null,
                       onTap: () {
                         Navigator.pop(context);
@@ -173,7 +173,7 @@ class _BillDetailsReceiptState extends State<BillDetailsReceipt> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
         ],
       ),

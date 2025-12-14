@@ -450,7 +450,7 @@ class _Individual_billState extends State<Individual_bill> {
                 },
               );
             }),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         StreamBuilder(

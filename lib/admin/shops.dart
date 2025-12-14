@@ -132,16 +132,16 @@ class _ShopsState extends State<Shops> {
                         Container(
                           width: MediaQuery.of(context).size.width,
                           height: 50,
-                          padding: EdgeInsets.symmetric(horizontal: 10.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(25),
-                            color: Color.fromRGBO(250, 250, 250, 1),
+                            color: const Color.fromRGBO(250, 250, 250, 1),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.grey.withOpacity(0.5),
                                 spreadRadius: 1,
                                 blurRadius: 2,
-                                offset: Offset(0, 1),
+                                offset: const Offset(0, 1),
                               ),
                             ],
                           ),
@@ -168,7 +168,7 @@ class _ShopsState extends State<Shops> {
                                 borderSide: BorderSide.none,
                               ),
                               contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 20.0),
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
                               suffixIcon: IconButton(
                                 onPressed: () {},
                                 icon: Image.asset(

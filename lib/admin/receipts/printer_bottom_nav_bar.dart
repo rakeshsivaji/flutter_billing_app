@@ -37,7 +37,7 @@ class _PrinterBottomNavBarState extends State<PrinterBottomNavBar> {
               itemBuilder: (context, index) {
                 final device = devices[index];
                 return ListTile(
-                  leading: Icon(Icons.print),
+                  leading: const Icon(Icons.print),
                   title: Text(device.name ?? 'Unknown Device'),
                   subtitle: Text(device.macAdress),
                   onTap: () {
@@ -51,7 +51,7 @@ class _PrinterBottomNavBarState extends State<PrinterBottomNavBar> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
           ],
         ),

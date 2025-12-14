@@ -64,7 +64,7 @@ class _ShopsBalanceAmountState extends State<ShopsBalanceAmount> {
                             onTap: () => Navigator.pop(context),
                             borderRadius: BorderRadius.circular(20),
                             child: Padding(
-                              padding: EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(8.0),
                               child: Icon(
                                 Icons.arrow_back_ios_new,
                                 color: _appColors.whiteColor,
