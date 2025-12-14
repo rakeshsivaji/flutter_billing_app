@@ -25,6 +25,7 @@ class _EmployeesState extends State<Employees>
   bool switchValue = false;
   final _switchStream = StreamController.broadcast();
   bool showFab = true;
+  Timer? _searchDebounce;
 
   void showToast(String message) {
     Fluttertoast.showToast(
@@ -56,6 +57,15 @@ class _EmployeesState extends State<Employees>
         _scrollController.jumpTo(commonController.scrollPosition!);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    search.dispose();
+    _scrollController.dispose();
+    _switchStream.close();
+    super.dispose();
   }
 
   @override
@@ -110,7 +120,11 @@ class _EmployeesState extends State<Employees>
                           child: TextFormField(
                             controller: search,
                             onChanged: (value) {
-                              filterJobs(search: value);
+                              // Debounce search to avoid too many API calls
+                              _searchDebounce?.cancel();
+                              _searchDebounce = Timer(const Duration(milliseconds: 500), () {
+                                filterJobs(search: value);
+                              });
                             },
                             decoration: InputDecoration(
                               hintText: 'தேடு பணியாளர்',

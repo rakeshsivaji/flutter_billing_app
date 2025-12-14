@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:billing_app/controllers/common_controller.dart';
 import 'package:billing_app/widgets/customappbar.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +19,7 @@ class _ProductsState extends State<Products> {
   final TextEditingController search = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   double _scrollPosition = 0.0;
+  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -29,6 +32,14 @@ class _ProductsState extends State<Products> {
         _scrollController.jumpTo(commonController.scrollPosition!);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    search.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -82,7 +93,11 @@ class _ProductsState extends State<Products> {
                           child: TextFormField(
                             controller: search,
                             onChanged: (value) {
-                              filterJobs(search: value);
+                              // Debounce search to avoid too many API calls
+                              _searchDebounce?.cancel();
+                              _searchDebounce = Timer(const Duration(milliseconds: 500), () {
+                                filterJobs(search: value);
+                              });
                             },
                             decoration: InputDecoration(
                               hintText: 'தேடு பொருள்',

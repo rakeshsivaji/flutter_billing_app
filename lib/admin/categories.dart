@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:billing_app/Models/category_model.dart';
 import 'package:billing_app/controllers/common_controller.dart';
 import 'package:billing_app/services/common_service.dart';
@@ -32,6 +34,7 @@ class _CategoriesState extends State<Categories> {
   bool isprofile = false;
   TextEditingController name = TextEditingController();
   final TextEditingController search = TextEditingController();
+  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -41,6 +44,7 @@ class _CategoriesState extends State<Categories> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     search.dispose();
     super.dispose();
   }
@@ -131,7 +135,11 @@ class _CategoriesState extends State<Categories> {
                           child: TextFormField(
                             controller: search,
                             onChanged: (value) {
-                              filterJobs(search: value);
+                              // Debounce search to avoid too many API calls
+                              _searchDebounce?.cancel();
+                              _searchDebounce = Timer(const Duration(milliseconds: 500), () {
+                                filterJobs(search: value);
+                              });
                             },
                             decoration: InputDecoration(
                               hintText: 'தேடு வகை',
