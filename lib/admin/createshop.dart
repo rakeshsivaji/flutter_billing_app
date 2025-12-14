@@ -2,6 +2,7 @@ import 'package:billing_app/Models/createshop_Model.dart';
 import 'package:billing_app/controllers/common_controller.dart';
 import 'package:billing_app/services/common_service.dart';
 import 'package:billing_app/widgets/customappbar.dart';
+import 'package:billing_app/components/cached_network_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
@@ -673,10 +674,11 @@ class _CreateShopState extends State<CreateShop> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.network(
-                data.image,
+              CachedNetworkImageWidget(
+                imageUrl: data.image,
                 width: 30,
                 height: 30,
+                fit: BoxFit.cover,
               ),
               const SizedBox(
                 width: 35.0,

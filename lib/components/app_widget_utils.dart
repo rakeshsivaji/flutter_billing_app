@@ -1,4 +1,5 @@
 import 'package:billing_app/components/app_colors.dart';
+import 'package:billing_app/components/cached_network_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -82,6 +83,30 @@ class AppWidgetUtils {
       maxLines: maxLines,
       textAlign: textAlign,
       overflow: overflow,
+    );
+  }
+
+  /// Helper method to create a cached network image widget
+  /// Use this method for consistent image caching across the app
+  static Widget buildCachedNetworkImage({
+    required String imageUrl,
+    double? width,
+    double? height,
+    BoxFit fit = BoxFit.cover,
+    BorderRadius? borderRadius,
+    Widget? placeholder,
+    Widget? errorWidget,
+    bool showProgressIndicator = true,
+  }) {
+    return CachedNetworkImageWidget(
+      imageUrl: imageUrl,
+      width: width,
+      height: height,
+      fit: fit,
+      borderRadius: borderRadius,
+      placeholder: placeholder,
+      errorWidget: errorWidget,
+      showProgressIndicator: showProgressIndicator,
     );
   }
 }

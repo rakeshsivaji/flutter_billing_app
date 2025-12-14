@@ -1,5 +1,6 @@
 import 'package:billing_app/controllers/common_controller.dart';
 import 'package:billing_app/widgets/customappbar.dart';
+import 'package:billing_app/components/cached_network_image_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -246,8 +247,15 @@ class _ProductsState extends State<Products> {
             ),
             Expanded(
               child: Container(
-                child: Image.network(data.image,
-                fit: BoxFit.fill,),
+                child: CachedNetworkImageWidget(
+                  imageUrl: data.image,
+                  fit: BoxFit.fill,
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(15),
+                  ),
+                  showProgressIndicator: true,
+                  placeholderColor: const Color.fromRGBO(250, 250, 250, 1),
+                ),
               ),
             ),
             const SizedBox(
