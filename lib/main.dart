@@ -75,6 +75,7 @@ import 'package:billing_app/form/splash.dart';
 import 'package:billing_app/user/stocklist.dart';
 import 'package:billing_app/user/stocklist2.dart';
 import 'package:billing_app/user/stocklisthistory.dart';
+import 'package:billing_app/services/common_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
@@ -83,6 +84,10 @@ import 'package:get/get.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FlutterDownloader.initialize(debug: false, ignoreSsl: true);
+  
+  // Initialize offline support (cache and network services)
+  await CommonService().initializeOfflineSupport();
+  
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(const MyApp());
 }

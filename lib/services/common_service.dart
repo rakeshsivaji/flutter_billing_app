@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:billing_app/admin/createproducts.dart';
+import 'package:billing_app/services/cache_service.dart';
+import 'package:billing_app/services/network_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +18,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class CommonService {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  final CacheService _cacheService = CacheService();
+  final NetworkService _networkService = NetworkService();
+  
   Map<String, String> defaultHeader = {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -26,6 +31,12 @@ class CommonService {
   
   /// Use Flutter's built-in debug mode for conditional logging
   bool get debug => kDebugMode;
+
+  /// Initialize cache and network services
+  Future<void> initializeOfflineSupport() async {
+    await _cacheService.initialize();
+    await _networkService.initialize();
+  }
 
   Future<dynamic> signin(Map map) async {
     final SharedPreferences prefs = await _prefs;
@@ -1337,24 +1348,48 @@ class CommonService {
   Future<dynamic> delete(String url) async {
     dynamic response;
     var token = await getToken();
+    final fullUrl = '$baseUrl/$url';
+    final headers = Map<String, String>.from(defaultHeader);
+    
     if (debug) {
-      print('=========== GET hit =============');
+      print('=========== DELETE hit =============');
       print('token --> $token');
     }
-    if (token.toString().isNotEmpty) {
-      defaultHeader['Authorization'] = 'Bearer $token';
-      response =
-          await http.delete(Uri.parse('$baseUrl/$url'), headers: defaultHeader);
+    
+    // Check if offline - DELETE requests cannot be cached
+    final isConnected = await _networkService.checkConnectivity();
+    if (!isConnected) {
       if (debug) {
-        print('is token present ? --> YES !');
-        print('header --> $defaultHeader');
-        print("url --> ${Uri.parse('$baseUrl/$url')}");
-        print('response body --> ${response.body}');
+        print('Offline mode: Cannot process DELETE request');
+      }
+      return _createOfflineErrorResponse();
+    }
+    
+    if (token.toString().isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+      try {
+        response = await http.delete(Uri.parse(fullUrl), headers: headers);
+        
+        // Invalidate cache for deleted resource
+        if (response.statusCode == 200) {
+          await _cacheService.invalidateCache(fullUrl, headers: headers);
+        }
+        
+        if (debug) {
+          print('is token present ? --> YES !');
+          print('header --> $headers');
+          print("url --> ${Uri.parse(fullUrl)}");
+          print('response body --> ${response.body}');
+        }
+      } catch (e) {
+        if (debug) {
+          print('Network error during DELETE: $e');
+        }
+        rethrow;
       }
     }
     if (debug) {
-      // print("response --> $response");
-      print('=========== end GET hit =============');
+      print('=========== end DELETE hit =============');
     }
     return response;
   }
@@ -1362,19 +1397,72 @@ class CommonService {
   Future<dynamic> get(String url) async {
     dynamic response;
     var token = await getToken();
+    final fullUrl = '$baseUrl/$url';
+    final headers = Map<String, String>.from(defaultHeader);
+    
     if (debug) {
       print('=========== GET hit =============');
       print('token --> $token');
     }
-    if (token.toString().isNotEmpty) {
-      defaultHeader['Authorization'] = 'Bearer $token';
-      response =
-          await http.get(Uri.parse('$baseUrl/$url'), headers: defaultHeader);
+    
+    // Check if offline - try to get from cache
+    final isConnected = await _networkService.checkConnectivity();
+    if (!isConnected) {
       if (debug) {
-        print('is token present ? --> YES !');
-        print('header --> $defaultHeader');
-        print("url --> ${Uri.parse('$baseUrl/$url')}");
-        print('response body --> ${response.body}');
+        print('Offline mode: Checking cache for $url');
+      }
+      final cachedResponse = await _cacheService.getCachedResponse(fullUrl, headers: headers);
+      if (cachedResponse != null) {
+        // Return cached response as http.Response-like object
+        if (debug) {
+          print('Returning cached response for $url');
+        }
+        return _createCachedHttpResponse(cachedResponse);
+      } else {
+        if (debug) {
+          print('No cache available for $url');
+        }
+        // Return error response indicating offline
+        return _createOfflineErrorResponse();
+      }
+    }
+    
+    if (token.toString().isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+      try {
+        response = await http.get(Uri.parse(fullUrl), headers: headers);
+        
+        // Cache successful responses
+        if (response.statusCode == 200) {
+          try {
+            final responseJson = json.decode(response.body);
+            await _cacheService.cacheResponse(fullUrl, responseJson, headers: headers);
+          } catch (e) {
+            if (debug) {
+              print('Error caching response: $e');
+            }
+          }
+        }
+        
+        if (debug) {
+          print('is token present ? --> YES !');
+          print('header --> $headers');
+          print("url --> ${Uri.parse(fullUrl)}");
+          print('response body --> ${response.body}');
+        }
+      } catch (e) {
+        if (debug) {
+          print('Network error: $e, trying cache...');
+        }
+        // Network error - try cache as fallback
+        final cachedResponse = await _cacheService.getCachedResponse(fullUrl, headers: headers);
+        if (cachedResponse != null) {
+          if (debug) {
+            print('Returning cached response after network error');
+          }
+          return _createCachedHttpResponse(cachedResponse);
+        }
+        rethrow;
       }
     }
     if (debug) {
@@ -1388,20 +1476,55 @@ class CommonService {
     dynamic response;
     var token = await getToken();
     var body = (map != null) ? json.encode(map) : null;
+    final fullUrl = '$baseUrl/$url';
+    final headers = Map<String, String>.from(defaultHeader);
+    
     if (debug) {
       print('=========== POST hit =============');
       print('body --> $body');
     }
-    if (token.toString().isNotEmpty) {
-      defaultHeader['Authorization'] = 'Bearer $token';
-      response = await http.post(Uri.parse('$baseUrl/$url'),
-          headers: defaultHeader, body: body);
+    
+    // Check if offline - POST requests typically shouldn't use cache
+    final isConnected = await _networkService.checkConnectivity();
+    if (!isConnected) {
       if (debug) {
-        print('is token present ? --> YES !');
-        print('header --> $defaultHeader');
-        print("url --> ${Uri.parse('$baseUrl/$url')}");
-        print('response --> $response');
-        print('response body --> ${response.body}');
+        print('Offline mode: Cannot process POST request');
+      }
+      return _createOfflineErrorResponse();
+    }
+    
+    if (token.toString().isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+      try {
+        response = await http.post(Uri.parse(fullUrl),
+            headers: headers, body: body);
+        
+        // Cache successful GET-like responses (if applicable)
+        // Note: POST responses are typically not cached, but we can cache
+        // specific endpoints that return read-only data
+        if (response.statusCode == 200 && _shouldCachePostResponse(url)) {
+          try {
+            final responseJson = json.decode(response.body);
+            await _cacheService.cacheResponse(fullUrl, responseJson, headers: headers);
+          } catch (e) {
+            if (debug) {
+              print('Error caching POST response: $e');
+            }
+          }
+        }
+        
+        if (debug) {
+          print('is token present ? --> YES !');
+          print('header --> $headers');
+          print("url --> ${Uri.parse(fullUrl)}");
+          print('response --> $response');
+          print('response body --> ${response.body}');
+        }
+      } catch (e) {
+        if (debug) {
+          print('Network error during POST: $e');
+        }
+        rethrow;
       }
     }
     if (debug) {
@@ -1505,6 +1628,16 @@ class CommonService {
       print('=========== response =============');
     }
     if (response != null) {
+      // Handle offline error response
+      if (response.statusCode == 503 && response.body.contains('OFFLINE')) {
+        responseJson = {
+          'status': 0,
+          'message': 'You are currently offline. Please check your internet connection.',
+          'offline': true,
+        };
+        return responseJson;
+      }
+      
       if (response.statusCode == 200) {
         responseJson = json.decode(response.body);
       } else if (response.statusCode == 422) {
@@ -1548,4 +1681,43 @@ class CommonService {
     }
     return responseJson;
   }
+
+  /// Helper method to create a cached HTTP response
+  dynamic _createCachedHttpResponse(Map<String, dynamic> cachedData) {
+    return _CachedHttpResponse(cachedData);
+  }
+
+  /// Helper method to create an offline error response
+  dynamic _createOfflineErrorResponse() {
+    return _CachedHttpResponse({
+      'status': 0,
+      'message': 'OFFLINE',
+    }, statusCode: 503);
+  }
+
+  /// Determine if a POST response should be cached
+  bool _shouldCachePostResponse(String url) {
+    // Cache POST responses for read-only operations
+    final cacheablePostEndpoints = [
+      'report',
+      'bill-entry',
+      'user-bill-entry',
+      'collection-path',
+    ];
+    return cacheablePostEndpoints.any((endpoint) => url.contains(endpoint));
+  }
+}
+
+/// Helper class to simulate HTTP response for cached data
+class _CachedHttpResponse {
+  final Map<String, dynamic> _data;
+  final int statusCode;
+
+  _CachedHttpResponse(this._data, {this.statusCode = 200});
+
+  String get body => json.encode(_data);
+  
+  Map<String, String> get headers => {
+    'content-type': 'application/json',
+  };
 }
