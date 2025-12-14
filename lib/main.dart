@@ -79,11 +79,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:get/get.dart';
+import 'package:billing_app/components/cached_network_image_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FlutterDownloader.initialize(debug: false, ignoreSsl: true);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  
+  // Configure image cache settings for better performance
+  // Set maximum cache size to 100 MB (default is usually 50 MB)
+  ImageCacheManager.setMaximumCacheSize(100 * 1024 * 1024);
+  // Set maximum number of cached images to 1000 (default is usually 1000)
+  ImageCacheManager.setMaximumCacheObjects(1000);
+  
   runApp(const MyApp());
 }
 
